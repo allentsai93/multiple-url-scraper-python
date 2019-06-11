@@ -1,5 +1,7 @@
 import urllib.request
 import requests
+import json
+import re
 from bs4 import BeautifulSoup
 
 main_url = "https://www.indeed.ca/jobs?l=Canada&jt=fulltime&start="
@@ -41,8 +43,8 @@ def parse_page(url):
             data["post_date"] = "Not Available"
         else:
             data["post_date"] = content.find(class_="date").string.strip()
-
-        data["url"] = content.find(class_="jobtitle")['href']
+        linkSlug = content.find(class_="jobtitle")['href']
+        data["url"] = f"https://www.indeed.com{linkSlug}"
         data["country"] = "Canada"
         data["tags"] = get_tags(data["title"])
         page_results.append(data)
@@ -50,12 +52,13 @@ def parse_page(url):
     return page_results
 
 def get_tags(str):
-    tags = str.lower().split(" ")
-    
+    cleaned_str = re.sub('[^0-9a-zA-Z]+', '', str)
+    tags = cleaned_str.lower().split(" ")
+
     if len(str) > 1:
-        tags.append(str)
-    
-    return ",".join(tags)
+        tags.append(cleaned_str)
+
+    return tags
 
 def sendToServer(data):
     for page in data:
