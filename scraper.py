@@ -1,4 +1,5 @@
 import urllib.request
+import requests
 from bs4 import BeautifulSoup
 
 main_url = "https://www.indeed.ca/jobs?l=Canada&jt=fulltime&start="
@@ -20,7 +21,9 @@ def parse_page(url):
     for content in results:
         data = {}
         data["title"] = content.find(class_="jobtitle").string.strip()
-        data["location"] = content.find(class_="location").string.strip()
+        location = content.find(class_="location").string.strip().split(", ")
+        data["city"] = location[0]
+        data["state"] = location[1]
         data["description"] = content.find(class_="summary").string.strip()
 
         if content.find(class_="company").string is None:
@@ -50,8 +53,9 @@ def get_tags(str):
 
 def sendToServer(data):
     headers = {'Content-Type': 'application/json', 'Accept':'application/json'}
-    
-    pass
+    for page in data:
+        for results in page:
+            requests.post(url="http://localhost:8000/api/jobs", data=results, header=headers)
 
 if __name__ == '__main__':
     data = []
