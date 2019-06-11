@@ -10,6 +10,7 @@ def parse_site(main_url, array=None):
     
     for page in range(0, 1000, 20):
         array.append(parse_page(main_url + str(page)))
+        print(f"Done page {page}")
     
     return array
 
@@ -23,7 +24,12 @@ def parse_page(url):
         data["title"] = content.find(class_="jobtitle").string.strip()
         location = content.find(class_="location").string.strip().split(", ")
         data["city"] = location[0]
-        data["state"] = location[1]
+
+        if len(location) > 1:
+            data["state"] = location[1]
+        else:
+            data["state"] = "Not Available"
+        
         data["description"] = content.find(class_="summary").string.strip()
 
         if content.find(class_="company").string is None:
@@ -44,20 +50,20 @@ def parse_page(url):
     return page_results
 
 def get_tags(str):
-    list = str.lower().split(" ")
+    tags = str.lower().split(" ")
     
     if len(str) > 1:
-        list.append(str)
+        tags.append(str)
     
-    return list
+    return ",".join(tags)
 
 def sendToServer(data):
-    headers = {'Content-Type': 'application/json', 'Accept':'application/json'}
     for page in data:
         for results in page:
-            requests.post(url="http://localhost:8000/api/jobs", data=results, header=headers)
+            requests.post(url="http://127.0.0.1:8000/api/jobs/", json=results)
 
 if __name__ == '__main__':
     data = []
     parse_site(main_url, data)
     sendToServer(data)
+    print("done")
