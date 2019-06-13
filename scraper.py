@@ -6,9 +6,9 @@ from bs4 import BeautifulSoup
 
 main_url = "https://www.indeed.ca/jobs?l=Canada&jt=fulltime&start="
 
-def parse_site(main_url):
+def parse_site(main_url, data):
     for page in range(0, 1000, 20):
-        parse_page(main_url + str(page))
+        parse_page(main_url + str(page), data)
         print(f"Done page {page}")
 
 def parse_page(url, data_array):
@@ -46,11 +46,8 @@ def parse_page(url, data_array):
     return data_array
 
 def get_tags(str):
-    cleaned_str = re.sub(r"\s*[^A-Za-z]+\s*", ' ', str)
-    tags = cleaned_str.lower().split(" ")
-    tags.append(str)
-    tag_set = {*tags}
-    tags = [*tag_set]
+    cleaned_str = re.sub(r"\s*[^A-Za-z]+\s*", ' ', str).lower()
+    tags = cleaned_str.split(" ")
     return tags
 
 def sendToServer(data):
@@ -60,6 +57,6 @@ def sendToServer(data):
 
 if __name__ == '__main__':
     data = []
-    parse_site(main_url)
+    parse_site(main_url, data)
     sendToServer(data)
     print("done")
