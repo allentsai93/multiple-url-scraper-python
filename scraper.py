@@ -6,18 +6,12 @@ from bs4 import BeautifulSoup
 
 main_url = "https://www.indeed.ca/jobs?l=Canada&jt=fulltime&start="
 
-def parse_site(main_url, array=None):
-    if(array is None):
-        array = []
-    
+def parse_site(main_url):
     for page in range(0, 1000, 20):
-        array.append(parse_page(main_url + str(page)))
+        parse_page(main_url + str(page))
         print(f"Done page {page}")
-    
-    return array
 
-def parse_page(url):
-    page_results = []
+def parse_page(url, data_array):
     page = urllib.request.urlopen(url)
     soup = BeautifulSoup(page, 'html.parser')
     results = soup.find_all("div", class_="result")
@@ -39,7 +33,7 @@ def parse_page(url):
         else:
             data["company"] = content.find(class_="company").string.strip()
 
-        if content.find(class_="post_date") is None:
+        if content.find(class_="date") is None:
             data["post_date"] = "Not Available"
         else:
             data["post_date"] = content.find(class_="date").string.strip()
@@ -47,23 +41,25 @@ def parse_page(url):
         data["url"] = f"https://www.indeed.com{linkSlug}"
         data["country"] = "Canada"
         data["tags"] = get_tags(data["title"])
-        page_results.append(data)
+        data_array.append(data)
     
-    return page_results
+    return data_array
 
 def get_tags(str):
     cleaned_str = re.sub(r"\s*[^A-Za-z]+\s*", ' ', str)
     tags = cleaned_str.lower().split(" ")
-
+    tags.append(str)
+    tag_set = {*tags}
+    tags = [*tag_set]
     return tags
 
 def sendToServer(data):
-    for page in data:
-        for results in page:
-            requests.post(url="http://127.0.0.1:8000/api/jobs/", json=results)
+    for results in data:
+        requests.post(url="http://127.0.0.1:8000/api/jobs/", json=results)
+
 
 if __name__ == '__main__':
     data = []
-    parse_site(main_url, data)
+    parse_site(main_url)
     sendToServer(data)
     print("done")
