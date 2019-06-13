@@ -55,9 +55,6 @@ def get_tags(str):
     cleaned_str = re.sub(r"\s*[^A-Za-z]+\s*", ' ', str)
     tags = cleaned_str.lower().split(" ")
 
-    if len(str) > 1:
-        tags.append(cleaned_str)
-
     return tags
 
 def sendToServer(data):
