@@ -52,7 +52,7 @@ def parse_page(url):
     return page_results
 
 def get_tags(str):
-    cleaned_str = re.sub(r"\s*[^A-Za-z]+\s*", '', str)
+    cleaned_str = re.sub(r"\s*[^A-Za-z]+\s*", ' ', str)
     tags = cleaned_str.lower().split(" ")
 
     if len(str) > 1:
